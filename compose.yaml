@@ -1,0 +1,20 @@
+services:
+  fuel-record-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fuel-record-manager
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DB_FILE_NAME: /app/data/fuel-records.db
+      MAX_LOGO_SIZE_MB: 3
+    volumes:
+      - fuel-data:/app/data
+
+volumes:
+  fuel-data:

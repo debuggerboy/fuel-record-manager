@@ -1,0 +1,27 @@
+{
+  "name": "fuel-record-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev --host 0.0.0.0",
+    "build": "vinxi build",
+    "start": "vinxi start --host 0.0.0.0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@solidjs/start": "1.5.1",
+    "drizzle-orm": "^0.44.7",
+    "html-to-image": "^1.11.13",
+    "solid-js": "^1.9.9",
+    "@solidjs/meta": "^0.29.4",
+    "@solidjs/router": "^0.15.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2",
+    "vinxi": "^0.5.3",
+    "vite": "^6.0.5",
+    "vite-plugin-solid": "^2.11.0"
+  }
+}
