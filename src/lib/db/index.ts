@@ -1,5 +1,5 @@
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import * as schema from "./schema";
@@ -56,3 +56,55 @@ sqlite.exec(`
 
 export const db = drizzle({ client: sqlite, schema });
 export { sqlite };
+
+/*
+ * Bundled pump logos. They are added once on startup so the "Select Pump Logo"
+ * dropdown is useful immediately, and skipped when a logo with the same name
+ * already exists. Both paths are checked so this works under `bun run dev`
+ * (public/) and the built Bun server (.output/public/).
+ */
+const defaultPumpLogos = [
+  { pumpName: "Bharat Petroleum", filename: "pump-logo-bharat-petroleum.webp" },
+  { pumpName: "Hindustan Petroleum", filename: "pump-logo-hp.webp" },
+  { pumpName: "IndianOil", filename: "pump-logo-indian-oil.webp" },
+];
+
+const pumpLogoDirs = [
+  join(process.cwd(), "public", "images", "pump-logos"),
+  join(process.cwd(), ".output", "public", "images", "pump-logos"),
+];
+
+function seedDefaultPumpLogos() {
+  const logoDir = pumpLogoDirs.find((dir) =>
+    defaultPumpLogos.every((pump) => existsSync(join(dir, pump.filename)))
+  );
+
+  if (!logoDir) return;
+
+  const exists = sqlite.query(
+    "SELECT 1 FROM pump_logos WHERE pump_name = ? LIMIT 1"
+  );
+
+  const insert = sqlite.query(
+    `INSERT INTO pump_logos
+       (pump_name, logo_data, logo_mime_type, original_filename, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+
+  const now = new Date().toISOString();
+
+  for (const pump of defaultPumpLogos) {
+    if (exists.get(pump.pumpName)) continue;
+
+    insert.run(
+      pump.pumpName,
+      readFileSync(join(logoDir, pump.filename)),
+      "image/webp",
+      pump.filename,
+      now,
+      now
+    );
+  }
+}
+
+seedDefaultPumpLogos();
