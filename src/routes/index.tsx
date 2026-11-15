@@ -158,9 +158,21 @@ export default function Home() {
     setError("");
 
     try {
+      const { width, height } = node.getBoundingClientRect();
+
       const dataUrl = await toPng(node, {
         pixelRatio: 3,
         cacheBust: true,
+        width,
+        height,
+        /*
+         * The preview is centered inside the panel with `margin: 0 auto`,
+         * which resolves to a concrete left margin (e.g. 117px) in the live
+         * layout. html-to-image copies that computed margin onto the cloned
+         * node, so the drawing lands offset to the right of a canvas that is
+         * only as wide as the receipt itself, clipping the right edge.
+         */
+        style: { margin: "0" },
       });
 
       const link = document.createElement("a");
